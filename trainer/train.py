@@ -680,40 +680,8 @@ def test_at_end(trainer):
     #
     if args.task_is_sudoku:
         test_files = {
-            
                 'data/sudoku_test_bs-24-mask30to52_amb.pkl': 'bs24amb_test_30-52',
-#                 'data/sudoku_test_bs-24-mask30to70_amb.pkl': 'bs24amb_test',
                 'data/sudoku_test_bs-25-mask30to52_amb.pkl': 'bs25amb_test',
-#                 'data/sudoku_train_bs-24-mask30to70_amb.pkl': 'bs24amb_train',
-#                 'data/sudoku_train_bs-25-mask30to48_amb.pkl': 'bs25amb_train',
-            
-            
-#                 'data/sudoku_test_bs-16-mask30to58_amb.pkl': 'bs16amb',
-#                 'data/sudoku_test_bs-15-mask30to58_amb.pkl': 'bs15amb',
-#                 'data/sudoku_train_bs-15-mask30to58_mix.pkl': 'bs15mix_train',
-            
-#                 'data/sudoku_v2_test_bs-16-mask30to58_unq.pkl':'bs16unq_v2',
-#                 'data/sudoku_v2_test_bs-15-mask30to58_unq.pkl':'bs15unq_v2',
-#                 'data/sudoku_v2_test_bs-12-mask30to59_unq.pkl': 'bs12unq_v2',
-#                 'data/sudoku_v2_test_bs-8-mask30to67_unq.pkl': 'bs8unq_v2',
-#                 'data/sudoku_v2_test_bs-9-mask30to67_unq.pkl': 'bs9unq_v2',
-#                 'data/sudoku_v2_test_bs-10-mask30to63_unq.pkl': 'bs10unq_v2',
-               
-#                 'data/sudoku_test_bs-16-mask30to70_unq.pkl':'bs16unq',
-#                 'data/sudoku_test_bs-15-mask30to70_unq.pkl':'bs15unq',
-#                 'data/sudoku_test_bs-10-mask30to70_unq.pkl': 'bs10unq',
-#                 'data/sudoku_test_bs-12-mask30to70_unq.pkl': 'bs12unq',
-#                 'data/sudoku_test_bs-14-mask30to70.pkl': 'bs14',
-#                 'data/sudoku_9_all_unq_val.pkl': 'bs9val',
-            
-#                 'data/sudoku_9_all_unq_test.pkl': 'bs9test',
-#                 'data/sudoku_test_bs-8-mask30to70_unq.pkl': 'bs8unq',
-                #'data/sudoku_test_bs-16-mask30to70.pkl': 'bs16',
-                #'data/sudoku_test_bs-8-mask30to70.pkl': 'bs8',
-                #'data/sudoku_test_bs-10-mask30to70.pkl': 'bs10',
-                #'data/sudoku_test_bs-12-mask30to70.pkl': 'bs12',
-                #'data/sudoku_test_bs-15-mask30to70.pkl': 'bs15',
-                #'data/sudoku_9_all_unq_train.pkl': 'bs9train',
                 } 
         
     if args.task_is_gcp:
