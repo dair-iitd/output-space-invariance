@@ -1,0 +1,23 @@
+Sudoku Book Creator
+Author. B. Pieters
+
+For this script you need:
+- working pdflatex
+- working asymptote install
+- working gss
+
+You can generate sudoku books with puzzeles and solutions.
+
+Usage MakeBook.sh [options]
+Options:
+    -h|--help:         Print this help
+    -l|--level:        Set the sudoku level
+    -t|--type:         Set the sudoku type. Valid types are STD, NRC, NRCX, CUBE, JIGSAW, JIGSAW-XL, JIGCUBE, 3DCUBE, PARQ
+    -o|--out:          Base name of the book
+    -n|--number:       Number of sudokus in the book
+
+Example:
+./MakeBook.sh -o Cubes -t CUBE -l 4 -n 12
+will create a book called Cube.pdf which contains 12 CUBE type sudokus of level 4. In addition 
+it will create Cube.tex which can be used to edit and recompile with latex and asymptote if you 
+want to edit the book.

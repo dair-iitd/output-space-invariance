@@ -1,0 +1,1140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Generic Sudoku Solver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<!-- html --> 
+<meta name="src" content="index.tex"> 
+<link rel="stylesheet" type="text/css" href="index.css"> 
+</head><body 
+>
+<!--l. 7--><p class="noindent" >
+                                                                          
+
+                                                                          
+<div class="center" 
+>
+<!--l. 8--><p class="noindent" >
+<!--l. 10--><p class="noindent" ><span 
+class="cmbx-12x-x-207">Generic Sudoku Solver</span><br />
+B. Pieters</div>
+                                                                          
+
+                                                                          
+   <h3 class="likesectionHead"><a 
+ id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+   <span class="sectionToc" >1 <a 
+href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />   <span class="sectionToc" >2 <a 
+href="#x1-30002" id="QQ2-1-3">The gss Program</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >2.1 <a 
+href="#x1-40002.1" id="QQ2-1-4">Description</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >2.2 <a 
+href="#x1-50002.2" id="QQ2-1-5">Building gss</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >2.3 <a 
+href="#x1-60002.3" id="QQ2-1-6">Used solution strategies</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >2.4 <a 
+href="#x1-70002.4" id="QQ2-1-7">Sudoku input syntax</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >2.5 <a 
+href="#x1-80002.5" id="QQ2-1-8">Usage</a></span>
+<br />   <span class="sectionToc" >3 <a 
+href="#x1-90003" id="QQ2-1-9">Examples</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >3.1 <a 
+href="#x1-100003.1" id="QQ2-1-10">Basic Usage</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >3.2 <a 
+href="#x1-110003.2" id="QQ2-1-14">Testing gss</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >3.3 <a 
+href="#x1-120003.3" id="QQ2-1-15">Using gss with asymptote</a></span>
+<br />   <span class="sectionToc" >4 <a 
+href="#x1-130004" id="QQ2-1-17">Creating sudokus with gss</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >4.1 <a 
+href="#x1-140004.1" id="QQ2-1-18">JigSawMRF: A random field generator for jigsaw sudokus</a></span>
+<br />   &#x00A0;<span class="subsectionToc" >4.2 <a 
+href="#x1-150004.2" id="QQ2-1-19">MakeBook.sh: A script for creating sudoku books</a></span>
+<br />   <span class="sectionToc" >A <a 
+href="#x1-16000A" id="QQ2-1-20">Example input file for gss</a></span>
+   </div>
+                                                                          
+
+                                                                          
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a 
+ id="x1-20001"></a>Introduction</h3>
+<!--l. 19--><p class="noindent" >The generic sudoku solver (gss) is a program that solves and generates sudokus.
+The program not only solves standard sudokus but can handle many different
+sudoku topologies, such as X-, jigsaw-, and NRC-sudokus. The gss input format
+allows you to input and create all sorts of sudoku topologies. This document
+describes gss and how to use it. You can view this document online at
+<a 
+href="https://bartp5.github.io/gss/" class="url" ><span 
+class="cmtt-12">https://bartp5.github.io/gss/</span></a>.
+<!--l. 21--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a 
+ id="x1-30002"></a>The gss Program</h3>
+<!--l. 22--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">2.1   </span> <a 
+ id="x1-40002.1"></a>Description</h4>
+<!--l. 23--><p class="noindent" >The gss program was developed to solve a wide variety of sudokus. Furthermore, I
+wanted to write a solver that applies logic rather than the usual basic elimination
+and backtracking (systematic guessing) that most solvers seem to apply. The gss
+solver uses various logic strategies to solve a sudoku (see Section <a 
+href="#x1-60002.3">2.3<!--tex4ht:ref: strategies --></a>). The
+implemented logic is not sufficient to solve all sudokus so gss also uses
+backtracking as a last resort.
+<!--l. 25--><p class="indent" >   Before we continue some terminology that will be used throughout this
+document. A sudoku consists of elements. Each element is a member of at the
+very least one but generally more than one blocks. The blocks in a sudoku all have
+the same size. The block size of a sudoku equals the number of symbols in the
+sudoku. In a solved sudoku each element is assigned one symbol and the elements
+within each block together contain the complete set of symbols in the sudoku, i.e.
+two elements within one block may not share the same symbol. A standard 9x9
+sudoku has 9 symbols (1-9), 81 elements arranged in a 9x9 square, and
+the blocks are 9 rows, 9 columns, and 9 non-obverlapping squares of 3x3
+elements.
+<!--l. 27--><p class="indent" >   The sudokus gss can handle may have block sizes up to 128 symbols (if your
+platform supports 128 bit integers and gss was compiled with 128bit integer
+support, see Section <a 
+href="#x1-50002.2">2.2<!--tex4ht:ref: compile --></a>).
+<!--l. 29--><p class="indent" >   The input format of gss allows you to specify the size of the sudoku,
+                                                                          
+
+                                                                          
+the block size and each block and its member elements, and the element
+symbol (if known). Valid sudoku files may also be used as a template for
+creating new sudokus. Furthermore, the gss format allows you to specify
+the output (ASCII) format in a flexible way, such that you can have gss
+display your sudoku in ASCII-art or let gss produce an input file for a
+3rd party program which can then produce a prettier version of your
+sudoku.
+<!--l. 31--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">2.2   </span> <a 
+ id="x1-50002.2"></a>Building gss</h4>
+<!--l. 32--><p class="noindent" >To build gss first get the latest source code from <a 
+href="https://github.com/bartp5/gss" class="url" ><span 
+class="cmtt-12">https://github.com/bartp5/gss</span></a>.
+<!--l. 34--><p class="indent" >   To compile gss type &#8220;make&#8221; and &#8220;make install&#8221;. In the Makefile you may
+change some options. The size option may have the following values:
+      <ul class="itemize1">
+      <li class="itemize"> <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">M32bit</span></span></span>
+      </li>
+      <li class="itemize"> <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">M64bit</span></span></span>
+      </li>
+      <li class="itemize"> <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">M128bit</span></span></span></li></ul>
+<!--l. 40--><p class="noindent" >This size indicate the maximum block size (i.e. the number of symbols). For <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">M32bit</span></span></span>
+the maximum block size is 32 symbols and for <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">M128bit</span></span></span> it is 128. This means
+that if you want to solve a 100x100 sudoku you need gss to be compiled
+with the <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">M128bit</span></span></span> option. The gss program extensively uses the popcount
+function on integers. You may use gss own popcount implementations
+or use the gcc popcount implementations (which are generally faster).
+To use a gcc popcount function you need to specify <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">GCC_POPCNT&#x003C;bits&#x003E;</span></span></span>,
+where <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">&#x003C;bits&#x003E;</span></span></span> matches the integer size. For 128 bit integers you may both
+specify <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">GCC_POPCNT64</span></span></span> or <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">GCC_POPCNT128</span></span></span>. This is as with 128 bit integers a
+128 bit popcount is optionally constructed using two 64 bit popcount
+operations.
+<!--l. 42--><p class="indent" >   To verify the correct behavior of gss use &#8220;make test&#8221;. This will invoke gss with
+a database with about 50000 sudokus with known solutions and report back
+whether gss correctly solved the sudokus.
+                                                                          
+
+                                                                          
+<!--l. 44--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">2.3   </span> <a 
+ id="x1-60002.3"></a>Used solution strategies</h4>
+<!--l. 45--><p class="noindent" >The following strategies are used for solving the sudokus.
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">elim</span> </dt><dd 
+class="description">                                                          <br 
+class="newline" />Elimination: If we have a subset set of n elements in a block, whose only
+      possible symbols are limited to a subset of n possible symbols, we can
+      eliminate these n symbols from all other elements within the block. For
+      example, if, in a standard sudoku, we find 3 elements where element 1
+      is one of the symbols 1, 2, or 3, element 2 is one 1 or 2, and element 3 is
+      one of 2 or 3, then we can eliminate symbols 1, 2, and 3 from elements
+      4 till 9. The level of this strategy is the number of elements/symbols
+      in the subset. At level 1 this becomes basic elimination.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">hidden</span> </dt><dd 
+class="description">                                                        <br 
+class="newline" />Find hidden sets. If a set of n symbols are only possible in a set of n
+      elements, we can eliminate all remaining symbols from these n elements.
+      For example if the symbols 1 and 2 are only possible in elements 1 and
+      2, we can eliminate all other symbols from elements 1 and 2. The level
+      of this strategy is the number of symbols in the set.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">inter</span> </dt><dd 
+class="description">                                                         <br 
+class="newline" />Inter block elimination. In this elimination strategy we do the following.
+      Firstly we find in one block a subset of n elements which contain a
+      subset of n symbols, which are not present in the other elements in the
+      block. Then we check whether these n elements are also a subset of
+      another block. If so, we can eliminate the n symbols from all remaining
+      elements  in  the  second  block.  Note  this  this  describes  fairly  basic
+      inter-block links involving only two blocks.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">brute</span> </dt><dd 
+class="description">                                                         <br 
+class="newline" />Brute force backtracking.</dd></dl>
+<!--l. 78--><p class="indent" >   The different strategies and the maximum level at which the various strategies
+are applied can be controlled. Per default all strategies are enabled at the
+                                                                          
+
+                                                                          
+maximum level (blocksize-1). For standard sudokus, basic elimination and
+backtracking is usually faster than using higher level logic, i.e. if your aim is to
+solve many standard sudokus very fast you should disable the higher level logic
+(or consider getting a specialized sudoku solver for the task). However, the
+higher level logic has an important advantage over backtracking. The
+performance of the logic strategies scales better with sudoku size as compared
+to backtracking. For some large sudokus backtracking performance is
+quite poor. Furthermore, the logic strategies give you some sort of metric
+for the difficulty of the sudoku (the maximum level used to solve the
+sudoku), thus you can also generate a sudoku with a specific difficulty
+rating.
+<!--l. 80--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">2.4   </span> <a 
+ id="x1-70002.4"></a>Sudoku input syntax</h4>
+<!--l. 81--><p class="noindent" >The syntax for specifying a sudoku file works with several tags. We first discuss
+the tags for defining the size and block structure of the sudoku.
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">&#x003C;size&#x003E;</span> </dt><dd 
+class="description">                                                        <br 
+class="newline" />Specify the sudoku size (i.e. number of elements)
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;blocksize&#x003E;</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />Specify the sudoku block size (i.e. number of symbols)
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;block&#x003E;</span> </dt><dd 
+class="description">                                                       <br 
+class="newline" />Specify a block as a white space separated list of element numbers. The
+      element numbers are numbered in order of appearance in the input file
+      starting at 1.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;standardblocks&#x003E;</span> </dt><dd 
+class="description">                                              <br 
+class="newline" />Assumes a square sudoku (i.e. the square root of the sudoku size if an
+      integer) where the blocks size is again the square of an integer. This
+      block specification is valid for sudokus of size 4x4, 9x9, 16x16, 25x25,
+      36x36, 49x49, ...This is the default block definition if no blocks are
+      defined
+                                                                          
+
+                                                                          
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;rowblocks&#x003E;</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />Assumes a square sudoku (i.e. the square root of the sudoku size if an
+      integer) where the blocks size equals the square root of the sudokus
+      size. This block specification assumes the elements appear in an order
+      following a row-mayor format and defines a block for each row in the
+      sudoku.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;colblocks&#x003E;</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />Assumes a square sudoku (i.e. the square root of the sudoku size if an
+      integer) where the blocks size equals the square root of the sudokus
+      size. This block specification assumes the elements appear in an order
+      following a row-mayor format and defines a block for each column in
+      the sudoku.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;downdiagblock&#x003E;</span> </dt><dd 
+class="description">                                               <br 
+class="newline" />Assumes a square sudoku (i.e. the square root of the sudoku size if an
+      integer) where the blocks size equals the square root of the sudokus
+      size. This block specification assumes the elements appear in an order
+      following a row-mayor format and defines a block along the diagonal
+      from top-left to bottom-right.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;updiagblock&#x003E;</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />Assumes a square sudoku (i.e. the square root of the sudoku size if an
+      integer) where the blocks size equals the square root of the sudokus
+      size. This block specification assumes the elements appear in an order
+      following a row-mayor format and defines a block along the diagonal
+      from bottom-left to top-right.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;blockblocks&#x003E;</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />Assumes a square sudoku (i.e. the square root of the sudoku size if an
+      integer) where the blocks size is again the square of an integer. This
+      block specification is valid for sudokus of size 4x4, 9x9, 16x16, 25x25,
+      36x36, 49x49, ... This command creates non overlapping square blocks
+      arranged in rows and columns.
+                                                                          
+
+                                                                          
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;matrix&#x003E;</span> </dt><dd 
+class="description">                                                      <br 
+class="newline" />Specify blocks by giving block index numbers for each element.</dd></dl>
+<!--l. 119--><p class="indent" >   There are several defaults that gss assumes if nothing else is defined. If no size
+is given gss assumes the size to be 81. If no block size is given gss assumes it to be
+9. if no blocks are defined gss assumes <span 
+class="cmmi-12">&#x003C;</span>standardblocks<span 
+class="cmmi-12">&#x003E;</span>.
+<!--l. 121--><p class="indent" >   The following tags are to define the sudoku array itself and the output format
+of gss.
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">&#x003C;sudoku&#x003E;</span> </dt><dd 
+class="description">                                                      <br 
+class="newline" />Define the sudoku. You can use any arbitrary text. Per default all words
+      consisting of only numbers or periods are interpreted as elements, where
+      &#8221;0&#8221; and &#8221;.&#8221; are interpreted as unknowns and all numbers as knowns.
+      Optionally  you  can  specify  specific  character  patterns  for  elements
+      using the <span 
+class="cmmi-12">&#x003C;</span>pattern<span 
+class="cmmi-12">&#x003E;</span>tag. Anything that is not interpreted as an element
+      will simply be copied one to one to the output format.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;pattern&#x003E;</span> </dt><dd 
+class="description">                                                     <br 
+class="newline" />Specify a pattern to recognize elements. Patterns are strings where
+      exactly one character must be a single &#8220;.&#8221;. The position of the dot is
+      where the number goes in the string. For example, if you define the
+      pattern &#8220;x.x&#8221; any occurrence of &#8220;x<span 
+class="cmmi-12">&#x003C;</span>nums<span 
+class="cmmi-12">&#x003E;</span>x&#8221;, where <span 
+class="cmmi-12">&#x003C;</span>nums<span 
+class="cmmi-12">&#x003E;</span>is one
+      or more number characters, will be interpreted as an element.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">&#x003C;emptychar&#x003E;</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />Specify  a  character  to  specify  an  unknown  element  in  the  output
+      format. Per default this character is a &#8220;.&#8221;. With this tag you can change
+      it to any other character.</dd></dl>
+<!--l. 128--><p class="indent" >   Some examples are described in Section <a 
+href="#x1-90003">3<!--tex4ht:ref: examples --></a>.
+   <h4 class="subsectionHead"><span class="titlemark">2.5   </span> <a 
+ id="x1-80002.5"></a>Usage</h4>
+<!--l. 130--><p class="noindent" >the gss program is called from the command line as follows:<br 
+class="newline" /><span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">gss</span><span 
+class="cmtt-12">&#x00A0;[options]</span><span 
+class="cmtt-12">&#x00A0;&#x003C;sudoku</span><span 
+class="cmtt-12">&#x00A0;input</span><span 
+class="cmtt-12">&#x00A0;files&#x003E;</span><span 
+class="cmtt-12">&#x00A0;...</span></span></span><br 
+class="newline" />the following options are supported
+                                                                          
+
+                                                                          
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">--help, -h</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />Print a short help message
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--quiet, -q</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />Minimize stdout output
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--verbose, -v</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />Maximize stdout output
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--compact-format, -c</span> </dt><dd 
+class="description">                                          <br 
+class="newline" />Enables  the  compact  input  format  for  standard  9x9  sudokus:  one
+      sudoku per line of 81 numbers and no spaces. This format can be used
+      for benchmarking and verifying gss with a large number of sudokus.
+      There are many such collections of sudokus around to test solvers.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--native-format, -n</span> </dt><dd 
+class="description">                                           <br 
+class="newline" />With the native gss sudoku format you can specify the sudoku topology
+      and the puzzle and solution output formats.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--puzzle-out, -p</span> </dt><dd 
+class="description">                                              <br 
+class="newline" />Specify an output file for the unsolved puzzle
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--solution-out, -s</span> </dt><dd 
+class="description">                                            <br 
+class="newline" />Specify an output file for the solution
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--gss-out, -G</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />Output the puzzle in the gss native format
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--generate, -g</span> </dt><dd 
+class="description">                                                <br 
+class="newline" />Generate  a  new  sudoku  following  a  specified  template  format  (set
+      using the <span 
+class="cmtt-12">--template </span>option). Before gss may generate a sudoku the
+                                                                          
+
+                                                                          
+      template must be solved. If you do not have a valid sudoku template
+      you may try the sudoku filling algorithms (<span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">--fill,</span><span 
+class="cmtt-12">&#x00A0;or</span><span 
+class="cmtt-12">&#x00A0;--optfill</span></span></span>)
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--template, -t</span> </dt><dd 
+class="description">                                                <br 
+class="newline" />Specify a sudoku template for generating sudokus.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--analyze, -a</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />Analyze  the  template  sudoku  structure.  For  randomizing  a  sudoku
+      before creating a new one gss looks for permutations that can be applied
+      to the sudoku grid that again produce a valid sudoku grid. With this
+      option you get a small summary of what gss found. Note, however, that
+      some of the analysis is based on heuristics and thus gss will not always
+      find all valid permutations.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--limit-level, -l</span> </dt><dd 
+class="description">                                             <br 
+class="newline" />Limit the level (number of elements considered) for the logic based
+      strategies
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--strategies, -S</span> </dt><dd 
+class="description">                                              <br 
+class="newline" />Specify a comma separated list of strategies to be used for solving
+      the sudoku. Valid strategies are <span 
+class="cmtt-12">elim</span>, <span 
+class="cmtt-12">hidden</span>, <span 
+class="cmtt-12">inter</span>, and <span 
+class="cmtt-12">brute </span>(see
+      Section <a 
+href="#x1-60002.3">2.3<!--tex4ht:ref: strategies --></a>).
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--fill, -f</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />When no valid sudoku template is available, one can try to fill the
+      sudoku. For most sudokus the standard filling algorithm may be used
+      which is based on back tracking. However this method is unsuitable for
+      large sudokus as the computation time quickly becomes excessive with
+      larger sudokus. You may try the experimental optimizing filler instead.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--optfill, -F</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />When no valid sudoku template is available, one can try to fill the
+      sudoku. The optimizing filler fills the sudoku at random and then tries
+      to resolve conflicts till no conflicts exist. For large sudokus this method
+                                                                          
+
+                                                                          
+      outperforms backtracking. For standard sized sudokus this method is
+      usually slower (runtime for this filling algorithm tends to vary).</dd></dl>
+<!--l. 152--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a 
+ id="x1-90003"></a>Examples</h3>
+<!--l. 153--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">3.1   </span> <a 
+ id="x1-100003.1"></a>Basic Usage</h4>
+<!--l. 154--><p class="noindent" >In this section we present several examples of gss input files for various
+types of sudokus. You can find example input files for gss in the examples
+directory.
+<!--l. 156--><p class="indent" >   A basic input file for a standard sudoku could look like shown in Figure <a 
+href="#x1-100011">1<!--tex4ht:ref: plainsudoku --></a>. As
+no size and blocks are specified gss assumes the standard size and block
+structure. The sudoku array is formatted such in ASCII that the sudoku is
+somewhat readable. The input formatting will be copied by gss for the puzzle
+and solution output (i.e. gss just copies one to one whatever follows the
+<span 
+class="cmmi-12">&#x003C;</span>sudoku<span 
+class="cmmi-12">&#x003E; </span>tag, editing only those characters it recognizes as elements in the
+sudoku array). This copying of the formatting makes it relatively easy to
+define your input file such that the output format is what you want it to
+be.
+<!--l. 158--><p class="indent" >   To solve this sudoku you can run <span 
+class="cmtt-12">gss sudoku.gss</span><br 
+class="newline" /><hr class="figure"><div class="figure" 
+>
+                                                                          
+
+                                                                          
+<a 
+ id="x1-100011"></a>
+                                                                          
+
+                                                                          
+<div class="verbatim" id="verbatim-1">
+&#x003C;sudoku&#x003E;
+&#x00A0;<br />&#x00A0;+-------+-------+-------+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;3&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;7&#x00A0;.&#x00A0;5&#x00A0;|&#x00A0;9&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;2&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;9&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+-------+-------+-------+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;5&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;8&#x00A0;3&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;5&#x00A0;.&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;4&#x00A0;8&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;7&#x00A0;6&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+-------+-------+-------+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;1&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;8&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;2&#x00A0;|&#x00A0;9&#x00A0;.&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;9&#x00A0;.&#x00A0;|&#x00A0;6&#x00A0;2&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+-------+-------+-------+
+</div>
+<!--l. 176--><p class="nopar" >
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;1: </span><span  
+class="content">An example of a standard sudoku input file for gss</span></div><!--tex4ht:label?: x1-100011 -->
+                                                                          
+
+                                                                          
+<!--l. 178--><p class="indent" >   </div><hr class="endfigure">
+<!--l. 180--><p class="indent" >   An example of how you can create a specific sudoku variant can be found in
+Figure <a 
+href="#x1-100022">2<!--tex4ht:ref: nrcsudoku --></a>. This file is for an &#8220;NRC&#8221; sudoku, a sudoku with 4 additional blocks on
+top of the normal sudoku structure. In this example the additional blocks are
+defined using the <span 
+class="cmmi-12">&#x003C;</span>matrix<span 
+class="cmmi-12">&#x003E; </span>tag. If you do any type of non-standard block
+definition you always have to define all blocks as gss will not make any
+assumptions about the structure. As the remaining blocks are blocks in
+a standard sudoku we can use the <span 
+class="cmmi-12">&#x003C;</span>standardblocks<span 
+class="cmmi-12">&#x003E; </span>tag to define all
+remaining blocks with one tag. The sudoku array itself is again formatted in
+ASCII.
+<!--l. 182--><p class="indent" >   <hr class="figure"><div class="figure" 
+>
+                                                                          
+
+                                                                          
+<a 
+ id="x1-100022"></a>
+                                                                          
+
+                                                                          
+<div class="verbatim" id="verbatim-2">
+&#x003C;standardblocks&#x003E;
+&#x00A0;<br />&#x003C;matrix&#x003E;
+&#x00A0;<br />&#x00A0;+---------+-----------+---------+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;1&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|&#x00A0;2&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;1&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|&#x00A0;2&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---+-----+---+---+---+-----+---+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;1&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|&#x00A0;2&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;3&#x00A0;|&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;|&#x00A0;4&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---+-----+---+---+---+-----+---+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;3&#x00A0;|&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;|&#x00A0;4&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;3&#x00A0;|&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;|&#x00A0;4&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---------+-----------+---------+
+&#x00A0;<br />&#x003C;sudoku&#x003E;
+&#x00A0;<br />&#x00A0;+---------+-----------+---------+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;5&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;7&#x00A0;|&#x00A0;9&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;6&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---+-----+---+---+---+-----+---+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;3&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;6&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;5&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;5&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;8&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---+-----+---+---+---+-----+---+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;|
+                                                                          
+
+                                                                          
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;7&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---------+-----------+---------+
+</div>
+<!--l. 221--><p class="nopar" >
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;2: </span><span  
+class="content">An example of an NRC sudoku input file for gss</span></div><!--tex4ht:label?: x1-100022 -->
+                                                                          
+
+                                                                          
+<!--l. 223--><p class="indent" >   </div><hr class="endfigure">
+<!--l. 226--><p class="indent" >   Another very common variation is the size of the sudoku. The basic structure
+of a 9x9 standard sudoku can be maintained for a series of sizes starting with a
+4x4, 9x9, 16x16, 25x25, etc. In Figure <a 
+href="#x1-100033">3<!--tex4ht:ref: sudoku16 --></a> an example of a 16x16 sudoku
+is shown. As this time the size is not standard we need to tell gss the
+total number of elements in the sudoku with the <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">&#x003C;size&#x003E;</span></span></span>-tag, and the
+block size with the <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">&#x003C;blocksize&#x003E;</span></span></span>-tag. If the standard structure fits to the
+indicated size and block size, the <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">&#x003C;standardblocks&#x003E;</span></span></span>-tag can again be used
+to specify the all blocks for the standard sudoku structure. Depending
+on how gss is compiled gss has a maximum block-size of 128, i.e. the
+largest sudoku with the standard structure that is supported by gss is
+121x121.
+<!--l. 228--><p class="indent" >   <hr class="figure"><div class="figure" 
+>
+                                                                          
+
+                                                                          
+<a 
+ id="x1-100033"></a>
+                                                                          
+
+                                                                          
+<div class="verbatim" id="verbatim-3">
+&#x003C;size&#x003E;256
+&#x00A0;<br />&#x003C;blocksize&#x003E;16
+&#x00A0;<br />&#x003C;standardblocks&#x003E;
+&#x00A0;<br />&#x003C;sudoku&#x003E;
+&#x00A0;<br />+-------------+-------------+-------------+-------------+
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;08&#x00A0;|&#x00A0;10&#x00A0;12&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;14&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;05&#x00A0;|
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;02&#x00A0;..&#x00A0;..&#x00A0;04&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;11&#x00A0;|
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;07&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;05&#x00A0;01&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;16&#x00A0;..&#x00A0;03&#x00A0;|&#x00A0;04&#x00A0;..&#x00A0;14&#x00A0;06&#x00A0;|
+&#x00A0;<br />|&#x00A0;01&#x00A0;..&#x00A0;..&#x00A0;09&#x00A0;|&#x00A0;..&#x00A0;06&#x00A0;..&#x00A0;07&#x00A0;|&#x00A0;11&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;03&#x00A0;16&#x00A0;..&#x00A0;|
+&#x00A0;<br />+-------------+-------------+-------------+-------------+
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;12&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;11&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;07&#x00A0;..&#x00A0;04&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;02&#x00A0;..&#x00A0;13&#x00A0;|
+&#x00A0;<br />|&#x00A0;05&#x00A0;01&#x00A0;08&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;16&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;04&#x00A0;|
+&#x00A0;<br />|&#x00A0;03&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;09&#x00A0;05&#x00A0;..&#x00A0;15&#x00A0;|&#x00A0;..&#x00A0;06&#x00A0;07&#x00A0;..&#x00A0;|
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;04&#x00A0;..&#x00A0;08&#x00A0;|&#x00A0;13&#x00A0;..&#x00A0;..&#x00A0;01&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|
+&#x00A0;<br />+-------------+-------------+-------------+-------------+
+&#x00A0;<br />|&#x00A0;..&#x00A0;16&#x00A0;..&#x00A0;03&#x00A0;|&#x00A0;01&#x00A0;07&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;15&#x00A0;11&#x00A0;02&#x00A0;..&#x00A0;|&#x00A0;05&#x00A0;..&#x00A0;10&#x00A0;..&#x00A0;|
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;05&#x00A0;|&#x00A0;03&#x00A0;..&#x00A0;..&#x00A0;09&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;12&#x00A0;|
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;13&#x00A0;|&#x00A0;11&#x00A0;..&#x00A0;..&#x00A0;06&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|
+&#x00A0;<br />|&#x00A0;06&#x00A0;07&#x00A0;05&#x00A0;02&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;12&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;10&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;09&#x00A0;08&#x00A0;|
+&#x00A0;<br />+-------------+-------------+-------------+-------------+
+&#x00A0;<br />|&#x00A0;..&#x00A0;02&#x00A0;15&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;16&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;11&#x00A0;05&#x00A0;|&#x00A0;14&#x00A0;04&#x00A0;..&#x00A0;09&#x00A0;|
+&#x00A0;<br />|&#x00A0;16&#x00A0;05&#x00A0;09&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;13&#x00A0;..&#x00A0;|&#x00A0;06&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;08&#x00A0;..&#x00A0;..&#x00A0;01&#x00A0;|
+&#x00A0;<br />|&#x00A0;..&#x00A0;..&#x00A0;11&#x00A0;07&#x00A0;|&#x00A0;15&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;..&#x00A0;04&#x00A0;..&#x00A0;08&#x00A0;|&#x00A0;12&#x00A0;..&#x00A0;05&#x00A0;16&#x00A0;|
+&#x00A0;<br />|&#x00A0;14&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;04&#x00A0;10&#x00A0;..&#x00A0;01&#x00A0;|&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|&#x00A0;03&#x00A0;..&#x00A0;..&#x00A0;..&#x00A0;|
+&#x00A0;<br />+-------------+-------------+-------------+-------------+
+</div>
+<!--l. 255--><p class="nopar" >
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;3: </span><span  
+class="content">An example of an 16x16 sudoku in gss</span></div><!--tex4ht:label?: x1-100033 -->
+                                                                          
+
+                                                                          
+<!--l. 257--><p class="indent" >   </div><hr class="endfigure">
+   <h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a 
+ id="x1-110003.2"></a>Testing gss</h4>
+<!--l. 260--><p class="noindent" >There are many databases around with many sudokus. It is useful to be able
+to use gss on such a database to benchmark and verify gss. With the
+<span 
+class="cmtt-12">--compact-format </span>option you can pass a sudoku database. With this option gss
+will read multiple sudokus from one file. It will simply read the file until it read 81
+number characters, and take the result as one sudoku. Unknowns may be specified
+by either a zero or a period. If gss encounters a &#8220;#&#8221; it will skip the remainder of
+the line so you can add comments. Some commonly used sudoku databases are a
+list of minimal sudokus (with only 17 hints) which can be downloaded from
+<br 
+class="newline" /><a 
+href="http://staffhome.ecm.uwa.edu.au/~00013890/sudokumin.php" class="url" ><span 
+class="cmtt-12">http://staffhome.ecm.uwa.edu.au/</span><span 
+class="cmtt-12">~</span><span 
+class="cmtt-12">00013890/sudokumin.php</span></a>.<br 
+class="newline" />Several other lists of hard sudokus can be found at<br 
+class="newline" /><a 
+href="http://forum.enjoysudoku.com/the-hardest-sudokus-new-thread-t6539.html" class="url" ><span 
+class="cmtt-12">http://forum.enjoysudoku.com/the-hardest-sudokus-new-thread-t6539.html</span></a>.
+<!--l. 265--><p class="indent" >   When it comes to benchmarking you will find that gss is considerably slower
+than many other solvers. The primary reason for this is the use of higher
+level logic. Per default gss tries to use logic and uses backtracking only as
+a last resort. As it is, however, backtracking is not all that inefficient
+on the relatively small grid of a standard 9x9 sudoku. In fact we can
+easily boost gss performance by disabling the use of higher level logic
+(either pass <span 
+class="cmtt-12">-S brute </span>or <span 
+class="cmtt-12">-l 1</span>). Without higher level logic gss performance
+improves quite a bit on standard sudokus. Note however, that on larger
+sudokus backtracking may perform very bad as compared to higher level
+logic.
+<!--l. 268--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">3.3   </span> <a 
+ id="x1-120003.3"></a>Using gss with asymptote</h4>
+<!--l. 269--><p class="noindent" >The previous two examples use ASCII formatting for the sudoku. In general gss
+only handles ASCII in and output. However, the ASCII format is designed such
+that gss may provide the input for other progranms to produce prettier output.
+You can, for example, use gss in conjunction with the Asymptote program to
+create high quality sudoku graphics. To this end there are two tags in gss
+that are important. First of all the &#8220;<span 
+class="cmmi-12">&#x003C;</span>pattern<span 
+class="cmmi-12">&#x003E;</span>&#8221; tag, this tag specifies
+a pattern for a sudoku element. This way gss can tell elements apart
+                                                                          
+
+                                                                          
+from other numbers that may be part format requirements from another
+program. The second is the &#8220;<span 
+class="cmmi-12">&#x003C;</span>emptychar<span 
+class="cmmi-12">&#x003E;</span>&#8221; tag. Per default gss replaces
+unknowns with periods. This is clear in ASCII formatting but may not be
+desirable in conjunction with other programs. In figures <a 
+href="#x1-120014">4<!--tex4ht:ref: NRCout --></a>.a , and <a 
+href="#x1-120014">4<!--tex4ht:ref: NRCout --></a>.b
+an example is shown which was created with gss in conjunction with
+asymptote. In Fig. <a 
+href="#x1-120014">4<!--tex4ht:ref: NRCout --></a>.a we show a pretty version of the same sudoku as in
+Figure <a 
+href="#x1-100022">2<!--tex4ht:ref: nrcsudoku --></a>. The input file to create these graphics can be found in Appendix
+<a 
+href="#x1-16000A">A<!--tex4ht:ref: NRC4ASY --></a>.
+<!--l. 271--><p class="indent" >   <hr class="figure"><div class="figure" 
+>
+                                                                          
+
+                                                                          
+<a 
+ id="x1-120014"></a>
+                                                                          
+
+                                                                          
+<div class="center" 
+>
+<!--l. 272--><p class="noindent" >
+<!--l. 273--><p class="noindent" >a. <img 
+src="NRC.svg" alt="PIC"  
+> b. <img 
+src="NRC_solved.svg" alt="PIC"  
+></div>
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;4: </span><span  
+class="content">The resulting graphic after processing the gss puzzle output with
+asymptote. a: The processed puzzle output. b: the processes solution output</span></div><!--tex4ht:label?: x1-120014 -->
+                                                                          
+
+                                                                          
+<!--l. 279--><p class="indent" >   </div><hr class="endfigure">
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a 
+ id="x1-130004"></a>Creating sudokus with gss</h3>
+<!--l. 282--><p class="noindent" >To create new sudokus with gss you have to supply gss with a template sudoku,
+i.e. an input file describing a sudoku. The template sudoku is first solved by gss
+and subsequently randomized. After randomization gss eliminates elements again
+to create the new sudoku. For this procedure one needs a valid sudoku as a
+template. In some cases you may not have a valid sudoku (e.g. if you create a new
+sudoku layout you may not know a valid solution for the grid). In this case you
+can have gss try to fill your sudoku for you. There are two algorithms for filling
+sudokus. The first algorithm (invoked using the <span 
+class="cmtt-12">-f </span>option) starts with an
+empty grid and using backtracking until a valid solution is found. This
+works well for standard size sudokus but for larger grids this method
+becomes unusable as it becomes too slow. In this case you can try fill the
+sudoku with an optimization algorithm (invoked with <span 
+class="cmtt-12">-F</span>). Note, that
+not all sudoku structures you may come up with have a valid solution.
+The backtracking algorithm will tell you if no valid solution is found.
+However, the optimizer has no way of telling as it is not systematic in
+its search for a solution. If the optimizer fails you may have to try the
+backtracker to verify a solution exists. In the following two sections I
+discuss JigSawMRF, a random field generator to aid the creation of jigsaw
+sudokus and the MakeBook.sh script which demonstrates the creation
+of various types of sudokus. You can use the script as a tool to create
+puzzle books or study it to learn how to make your own sudokus with
+gss.
+<!--l. 285--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a 
+ id="x1-140004.1"></a>JigSawMRF: A random field generator for jigsaw sudokus</h4>
+<!--l. 286--><p class="noindent" >A common variety of sudokus are jigsaw sudokus where some blocks are
+irregularly shaped. Usually a jigsaw sudoku consists of some regular blocks, such
+as rows and columns, and irregular blocks. To obtain a somewhat playable sudoku
+the cells in an irregular block are generally all connected, which makes it possible
+to make clear graphical representation of the irregular blocks. Naturally, gss has
+no problem solving a jigsaw sudoku as we can simply define the irregular blocks
+                                                                          
+
+                                                                          
+with the <span 
+class="cmmi-12">&#x003C;</span>block<span 
+class="cmmi-12">&#x003E;</span>or <span 
+class="cmmi-12">&#x003C;</span>matrix<span 
+class="cmmi-12">&#x003E;</span>tags. However, gss cannot create a new
+jigsaw structure. To generate new jigsaw sudoku structures the utility
+JigSawMRF is provided. The JigSawMRF utility generates a random
+field, which separates a field into a number of equal sized and connected
+blocks.
+<!--l. 288--><p class="indent" >   The elements in the random fields JigSawMRF generate all have an ID
+number and a coordinate in an N dimensional space. The ID number can be used
+in gss to specify which cells belong to which block. The coordinates were
+introduced to aid the graphical representation of the field. The number of
+dimensions is at least one but can otherwise be chosen freely (so yes, you can
+create hyper dimensional jigsaw sudokus).
+<!--l. 290--><p class="indent" >   The JigSawMRF program starts with a specification of the field, i.e. which
+elements are in it, and for each element, which elements are its neighbors. The
+elements are than assigned random &#8221;phases&#8221;, i.e. are assigned to a random block.
+Then JigSawMRF iteratively swaps element phases until all elements of a
+specific phase are directly connected or connected via neighbors of the same
+phase.
+<!--l. 292--><p class="indent" >   The JigSawMRF program is called from the command line as follows:
+                                                                          
+
+                                                                          
+   <div class="verbatim" id="verbatim-4">
+JigSawMRF&#x00A0;[options+arguments]
+</div>
+<!--l. 295--><p class="nopar" > The following options with arguments are supported:
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">--rect, -r</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />Specify a rectangular field with rows and columns. This option must
+      be followed by two numbers (N rows and M columns). With this option
+      ech element in the field is connected with the elements above, below,
+      left, and right to it (i.e. no diagonal connections). The elements are
+      indexed in column mayor sequence.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--custom, -c</span> </dt><dd 
+class="description">                                                  <br 
+class="newline" />Specify a field manually. Use this option to have full control over the field
+      (e.g. non-rectangular fields). This option is followed by an input file-name
+      where the field topology is specified. Each line in the file must have the
+      format:
+                                                                          
+
+                                                                          
+      <div class="verbatim" id="verbatim-5">
+      (&#x003C;x&#x003E;,&#x003C;y&#x003E;,..)&#x00A0;&#x003C;EL&#x00A0;ID&#8217;s&#x003E;
+</div>
+      <!--l. 302--><p class="nopar" > where, <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">(&#x003C;x&#x003E;,&#x003C;y&#x003E;,...)</span></span></span> specifies the coordinate of each element in n
+      dimensional space. You can provide an arbitrary number of dimensions
+      provided all elements coordinates are specified with the same number of
+      dimensions. The element ID&#8217;s specify the neighbors of the element where the
+      element ID&#8217;s are numbered in the order of specification the file, starting at
+      1.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--phases, -p</span> </dt><dd 
+class="description">                                                  <br 
+class="newline" />Specify the number of phases (blocks) in the field
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--outp, -p</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />Output phases and coordinates. The output file contains N columns
+      for the N dimensional coordinate, plus a column with phase and
+      a column with the block size. The last column is for debugging
+      purposes and can indicate if one block consists of several disjoint
+      areas.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--outpe, -e</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />For each phase print the member element ID&#8217;s. This data may be used to
+      create the block definition in gss using the <span 
+class="cmmi-12">&#x003C;</span>block<span 
+class="cmmi-12">&#x003E;</span>tag.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--outb, -b</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />Export border points. For every two neighboring cells which are not a
+      member of the same block, export the coordinate exactly between the two
+      element coordinates.
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--verbose, -v</span> </dt><dd 
+class="description">                                                 <br 
+class="newline" />Specify the verbose level, L. If L=0, the output is minimal, otherwise
+                                                                          
+
+                                                                          
+      JigSawMRF will print out every L-th iteration the overall progress and the
+      minimum number of connected elements in a set, e.g., if this number if 1 it
+      means there is at least one element which is not connected to any other
+      element of the same block).
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--offset, -o</span> </dt><dd 
+class="description">                                                  <br 
+class="newline" />Specify an offset value for element ID&#8217;s. This affects the element ID
+      numbers in all output data. This is sometimes useful, for example
+      when only a part of a puzzle, with a specific range of element ID&#8217;s is
+      randomized.</dd></dl>
+<!--l. 313--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a 
+ id="x1-150004.2"></a>MakeBook.sh: A script for creating sudoku books</h4>
+<!--l. 314--><p class="noindent" >The script MakeBook.sh can create pdf&#8217;s with puzzles and solutions for various
+types of sudokus. The script relies on pdflatex, asymptote, and naturally also on
+gss and JigSawMRF. The script is located in a directory with several gss input
+files and other shell scripts which are requires for the proper functioning of the
+script. Usage:
+                                                                          
+
+                                                                          
+   <div class="verbatim" id="verbatim-6">
+MakeBook.sh&#x00A0;options+arguments]
+</div>
+<!--l. 317--><p class="nopar" > The following options with arguments are supported:
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">--help, -h</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />Display a short help message
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--level, -l</span> </dt><dd 
+class="description">                                                   <br 
+class="newline" />Specify the difficulty level
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--type, -t</span> </dt><dd 
+class="description">                                                    <br 
+class="newline" />Specify the sudoku type
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--out, -o</span> </dt><dd 
+class="description">                                                     <br 
+class="newline" />Specify the output file-name (pdf will be appended to the provided
+      string)
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--number, -n</span> </dt><dd 
+class="description">                                                  <br 
+class="newline" />Specify how many sudokus should be generated
+      </dd><dt class="description">
+<span 
+class="cmtt-12">--parallel, -p</span> </dt><dd 
+class="description">                                                <br 
+class="newline" />In case the sudokus are large and/or of a high level, generating the
+      sudokus  may  take  some  time.  Use  this  flag  to  use  more  than  one
+      CPU when generating sudokus. This option relies on the GNU parallel
+      program.</dd></dl>
+<!--l. 328--><p class="indent" >   The MakeBook.sh script knows several sudoku types. Samples of the sudoku
+types can be found below. The sudoku types are:
+      <dl class="description"><dt class="description">
+<span 
+class="cmtt-12">STD</span> </dt><dd 
+class="description">                                                           <br 
+class="newline" />Standard 9x9 sudoku:
+                                                                          
+
+                                                                          
+      <div class="center" 
+>
+<!--l. 331--><p class="noindent" >
+<!--l. 332--><p class="noindent" ><img 
+src="STD.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">NRC</span> </dt><dd 
+class="description">                                                           <br 
+class="newline" />NRC sudokus, like a standard sudoku plus 4 extra blocks (marked in
+      grey)
+      <div class="center" 
+>
+<!--l. 335--><p class="noindent" >
+<!--l. 336--><p class="noindent" ><img 
+src="NRC.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">NRCX</span> </dt><dd 
+class="description">                                                          <br 
+class="newline" />Like a NRC sudoku but with the two diagonals as additional blocks
+      <div class="center" 
+>
+<!--l. 339--><p class="noindent" >
+<!--l. 340--><p class="noindent" ><img 
+src="NRCX.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">CUBE</span> </dt><dd 
+class="description">                                                          <br 
+class="newline" />Sudoku covering 3 faces of a cube. Each face consists of 4 4x4 blocks. Each
+      row and each column extends over two faces.
+      <div class="center" 
+>
+<!--l. 343--><p class="noindent" >
+<!--l. 344--><p class="noindent" ><img 
+src="CUBE.svg" alt="PIC"  
+></div>
+                                                                          
+
+                                                                          
+      </dd><dt class="description">
+<span 
+class="cmtt-12">JIGSAW</span> </dt><dd 
+class="description">                                                        <br 
+class="newline" />Jigsaw sudoku. Like a standard sudoku with irregular block shapes
+      <div class="center" 
+>
+<!--l. 347--><p class="noindent" >
+<!--l. 348--><p class="noindent" ><img 
+src="jigsaw.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">JIGSAW-XL</span> </dt><dd 
+class="description">                                                     <br 
+class="newline" />Large jigsaw sudokus (16x16)
+      <div class="center" 
+>
+<!--l. 351--><p class="noindent" >
+<!--l. 352--><p class="noindent" ><img 
+src="jigsawxl.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">JIGCUBE</span> </dt><dd 
+class="description">                                                       <br 
+class="newline" />A jigsaw version of the CUBE type sudoku
+      <div class="center" 
+>
+<!--l. 355--><p class="noindent" >
+<!--l. 356--><p class="noindent" ><img 
+src="bigjigcube.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">3DCUBE</span> </dt><dd 
+class="description">                                                        <br 
+class="newline" />Foldable 3D sudoku
+      <div class="center" 
+>
+<!--l. 359--><p class="noindent" >
+<!--l. 360--><p class="noindent" ><img 
+src="3dcube.svg" alt="PIC"  
+></div>
+                                                                          
+
+                                                                          
+      </dd><dt class="description">
+<span 
+class="cmtt-12">PARQ</span> </dt><dd 
+class="description">                                                          <br 
+class="newline" />Parquet sudoku. Some elements cover more than one row and one
+      column.
+      <div class="center" 
+>
+<!--l. 363--><p class="noindent" >
+<!--l. 364--><p class="noindent" ><img 
+src="parquet.svg" alt="PIC"  
+></div>
+      </dd><dt class="description">
+<span 
+class="cmtt-12">LINKED</span> </dt><dd 
+class="description">                                                        <br 
+class="newline" />A 9x9 sudoku with 9 extra color-coded blocks
+      <div class="center" 
+>
+<!--l. 367--><p class="noindent" >
+<!--l. 368--><p class="noindent" ><img 
+src="linked.svg" alt="PIC"  
+></div>
+      </dd></dl>
+<!--l. 374--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">A   </span> <a 
+ id="x1-16000A"></a>Example input file for gss</h3>
+                                                                          
+
+                                                                          
+   <div class="verbatim" id="verbatim-7">
+&#x003C;size&#x003E;81
+&#x00A0;<br />&#x003C;blocksize&#x003E;9
+&#x00A0;<br />&#x003C;emptychar&#x003E;0
+&#x00A0;<br />&#x003C;pattern&#x003E;|.|
+&#x00A0;<br />&#x003C;standardblocks&#x003E;
+&#x00A0;<br />&#x003C;matrix&#x003E;
+&#x00A0;<br />&#x00A0;+---------+-----------+---------+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;1&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|&#x00A0;2&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;1&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|&#x00A0;2&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---+-----+---+---+---+-----+---+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;1&#x00A0;1&#x00A0;|&#x00A0;1&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;2&#x00A0;|&#x00A0;2&#x00A0;2&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;3&#x00A0;|&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;|&#x00A0;4&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---+-----+---+---+---+-----+---+
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;3&#x00A0;|&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;|&#x00A0;4&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;3&#x00A0;3&#x00A0;|&#x00A0;3&#x00A0;|&#x00A0;.&#x00A0;|&#x00A0;4&#x00A0;|&#x00A0;4&#x00A0;4&#x00A0;|&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;&#x00A0;&#x00A0;+-----+---+&#x00A0;&#x00A0;&#x00A0;+---+-----+&#x00A0;&#x00A0;&#x00A0;|
+&#x00A0;<br />&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|&#x00A0;.&#x00A0;.&#x00A0;&#x00A0;&#x00A0;.&#x00A0;|
+&#x00A0;<br />&#x00A0;+---------+-----------+---------+
+&#x00A0;<br />&#x003C;sudoku&#x003E;
+&#x00A0;<br />int[]&#x00A0;f={|0|,|0|,|4|,|0|,|5|,|0|,|2|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|7|,|9|,|2|,|0|,|0|,|0|,|0|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|0|,|0|,|6|,|1|,|0|,|0|,|0|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|0|,|0|,|0|,|0|,|1|,|0|,|0|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|3|,|0|,|0|,|6|,|0|,|0|,|5|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|0|,|0|,|5|,|0|,|8|,|0|,|0|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|0|,|4|,|0|,|0|,|0|,|1|,|0|,|0|,|2|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|0|,|0|,|3|,|0|,|0|,|0|,|0|,|0|,|0|,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;|0|,|0|,|0|,|0|,|0|,|0|,|7|,|0|,|0|};
+&#x00A0;<br />size(9cm);
+                                                                          
+
+                                                                          
+&#x00A0;<br />int&#x00A0;n&#x00A0;=&#x00A0;3;
+&#x00A0;<br />int&#x00A0;N&#x00A0;=&#x00A0;n*n;
+&#x00A0;<br />path&#x00A0;cell&#x00A0;=&#x00A0;box((0,0),(1,1));
+&#x00A0;<br />path&#x00A0;supercell&#x00A0;=&#x00A0;box((0,0),(n,n));
+&#x00A0;<br />for&#x00A0;(int&#x00A0;i=0;i&#x003C;2;++i)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;for&#x00A0;(int&#x00A0;j&#x00A0;=&#x00A0;0;&#x00A0;j&#x00A0;&#x003C;&#x00A0;2;&#x00A0;++j)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;fill(shift((n+1)*i+1,&#x00A0;(n+1)*j+1)*supercell,&#x00A0;mediumgrey);
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;draw(shift((n+1)*i+1,&#x00A0;(n+1)*j+1)*supercell,&#x00A0;black+linewidth(1pt));
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;}
+&#x00A0;<br />}
+&#x00A0;<br />int&#x00A0;k=0;
+&#x00A0;<br />for&#x00A0;(int&#x00A0;i&#x00A0;=&#x00A0;0;&#x00A0;i&#x00A0;&#x003C;&#x00A0;N;&#x00A0;++i)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;for&#x00A0;(int&#x00A0;j&#x00A0;=&#x00A0;0;&#x00A0;j&#x00A0;&#x003C;&#x00A0;N;&#x00A0;++j)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;draw(shift(i,&#x00A0;j)*cell,&#x00A0;black+linewidth(0.5pt));
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;if&#x00A0;(f[k]&#x003E;0)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;label(string(f[k]),p&#x00A0;=&#x00A0;fontsize(20pt),&#x00A0;(i+0.5,j+0.5));
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;k=k+1;
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;}
+&#x00A0;<br />}
+&#x00A0;<br />for&#x00A0;(int&#x00A0;i&#x00A0;=&#x00A0;0;&#x00A0;i&#x00A0;&#x003C;&#x00A0;n;&#x00A0;++i)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;for&#x00A0;(int&#x00A0;j&#x00A0;=&#x00A0;0;&#x00A0;j&#x00A0;&#x003C;&#x00A0;n;&#x00A0;++j)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;draw(shift(n*i,&#x00A0;n*j)*supercell,&#x00A0;black+linewidth(2pt));
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;}
+&#x00A0;<br />}
+</div>
+<!--l. 434--><p class="nopar" >
+    
+</body></html> 
+
+                                                                          
+
+
