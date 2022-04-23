@@ -680,8 +680,13 @@ def test_at_end(trainer):
     #
     if args.task_is_sudoku:
         test_files = {
-                'data/sudoku_test_bs-24-mask30to52_amb.pkl': 'bs24amb_test_30-52',
-                'data/sudoku_test_bs-25-mask30to52_amb.pkl': 'bs25amb_test',
+                'data/sudoku_test_bs-16-mask30to70_unq.pkl':'bs16unq',
+                'data/sudoku_test_bs-15-mask30to70_unq.pkl':'bs15unq',
+                'data/sudoku_test_bs-12-mask30to70_unq.pkl': 'bs12unq',
+                'data/sudoku_test_bs-10-mask30to70_unq.pkl': 'bs10unq',
+                'data/sudoku_9_all_unq_test.pkl': 'bs9test',
+                #'data/sudoku_test_bs-24-mask30to52_amb.pkl': 'bs24amb_test_30-52',
+                #'data/sudoku_test_bs-25-mask30to52_amb.pkl': 'bs25amb_test',
                 } 
         
     if args.task_is_gcp:
@@ -703,8 +708,6 @@ def test_at_end(trainer):
                     'data/futo_unq_test_bs-8_mask-30to70.pkl':'test_8',
                     'data/futo_unq_test_bs-9_mask-30to70.pkl':'test_9',
                     'data/futo_unq_test_bs-5_mask-30to70.pkl':'test_5',
-                    'data/futo_unq_val_bs-5_mask-30to70.pkl':'val_5',
-                    'data/futo_unq_train_bs-5_mask-30to70.pkl':'train_5',
                     'data/futo_unq_val_bs-6_mask-30to70.pkl':'val_6',
                     'data/futo_unq_train_bs-6_mask-30to70.pkl':'train_6',
                 }
