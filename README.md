@@ -32,10 +32,31 @@ conda env create -f environment.yml
 ```
 
 
-## Data Generation
+## Data Generation with Sample commands
 This repo contains three tasks over which we experiment - GCP, Futoshiki and Sudoku. 
 Download the datasets from this [drive link](https://drive.google.com/drive/folders/1v9oUJdAxNczs-cbaa4ZruRrVBGnY73uS?usp=sharing).
 Put them in a folder named `data` at the same level as the folder `trainer`
+
+Sample commands for dataset generation
+
+* GCP
+
+```
+python datagen/gcp_gen/gen.py --chromatic-num 5 --num-puzzles 300 --mask-low 60 --mask-high 70 --nodes-low 90 --nodes-high 120  --num-cores 5 --save-path data/gcp-puzzles.pkl
+```
+
+* Sudoku
+
+```
+python datagen/sudoku_gen/gen.py --board-size 8 --num-puzzles 50 --mask-low 19 --mask-high 43 --unq-flag 1 --num-cores 5 --save-path data/sudoku-puzzles.pkl
+```
+
+* Futoshiki
+
+```
+python datagen/futo_gen/gen.py --board-size 8 --num-puzzles 50 --mask-low 30 --mask-high 70 --save-path data/futoshiki-puzzles.pkl
+```
+
 
 ## Training and evaluating models
 
